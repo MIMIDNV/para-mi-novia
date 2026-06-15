@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Mi Niña Hermosa ❤️</title>
+
+    <style>
+        /* --- ESTILOS DE LA CUENTA REGRESIVA --- */
+        .contador-contenedor {
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 15px;
+            padding: 15px 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 10px rgba(255, 77, 109, 0.1);
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .contador-titulo {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #ff4d6d;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .contador-tiempo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4a4a4a;
+        }
+        
+        .contador-tiempo span {
+            color: #ff4d6d;
+        }
+
+        /* --- EFECTO DE CORAZONES FLOTANTES (CORREGIDO) --- */
+        .corazon-flotante {
+            position: fixed;
+            bottom: -50px;
+            user-select: none;
+            pointer-events: none;
+            z-index: -1; /* Se mantienen detrás de los elementos interactivos */
+            animation: flotar linear forwards;
+        }
+
+        @keyframes flotar {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8; /* Aparece suavemente al salir del borde inferior */
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-115vh) rotate(360deg);
+                opacity: 0; /* Desaparece por completo al salir por arriba */
+            }
+        }
+
+        /* --- ESTILOS GENERALES --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffe6e6;
+            color: #4a4a4a;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden; /* Evita barras de scroll horizontales molestas */
+        }
+
+        h1 {
+            color: #ff4d6d;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .subtitulo {
+            text-align: center;
+            color: #777;
+            margin-bottom: 60px;
+        }
+
+        /* --- CONTENEDOR DE SOBRES --- */
+        .contenedor-sobres {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 50px;
+            width: 100%;
+            max-width: 950px;
+            margin-bottom: 60px;
+            justify-items: center;
+        }
+
+        /* --- ESTRUCTURA DEL SOBRE INTERACTIVO --- */
+        .sobre-wrapper {
+            position: relative;
+            width: 200px;
+            height: 140px;
+            background-color: #ffccd5;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            cursor: pointer;
+            background-image: linear-gradient(to top right, #ffb3c1 50%, transparent 50%),
+                              linear-gradient(to top left, #ffb3c1 50%, transparent 50%);
+            background-size: 50% 100%;
+            background-repeat: no-repeat;
+            background-position: left bottom, right bottom;
+        }
+
+        /* La solapa (La tapa del sobre) */
+        .solapa {
+            position: absolute;
+            top: 0; left: 0;
+            width: 0; height: 0;
+            border-left: 100px solid transparent;
+            border-right: 100px solid transparent;
+            border-top: 70px solid #ff4d6d;
+            transform-origin: top;
+            transition: transform 0.4s ease-in-out, z-index 0.2s ease-in-out;
+            z-index: 3;
+        }
+
+        /* La carta oculta dentro */
+        .carta-previa {
+            position: absolute;
+            bottom: 5px; left: 15px;
+            width: 170px;
+            height: 110px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.4s ease-in-out;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff4d6d;
+        }
+
+        /* El frente del sobre */
+        .frente-sobre {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 0; height: 0;
+            border-left: 100px solid #ffb3c1;
+            border-right: 100px solid #ffb3c1;
+            border-top: 70px solid transparent;
+            border-bottom: 70px solid #ffccd5;
+            border-radius: 0 0 10px 10px;
+            z-index: 2;
+        }
+
+        /* --- EFECTO DE ANIMACIÓN (HOVER) --- */
+        .sobre-wrapper:hover .solapa {
+            transform: rotateX(180deg);
+            z-index: 0;
+            border-top-color: #ff85a1;
+        }
+
+        .sobre-wrapper:hover .carta-previa {
+            transform: translateY(-60px);
+            z-index: 2;
+        }
+
+        /* --- VENTANA MODAL (CARTA EXTENDIDA) --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .contenido-modal {
+            background-color: #fffafb;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 450px;
+            width: 80%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            animation: aparecer 0.4s ease;
+            border: 2px dashed #ff85a1;
+        }
+
+        @keyframes aparecer {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .cerrar-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #ff4d6d;
+        }
+
+        /* --- GALERÍA DE FOTOS --- */
+        .galeria-titulo {
+            color: #ff4d6d;
+            margin-top: 40px;
+        }
+
+        .contenedor-galeria {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px 10px;
+            scrollbar-width: thin;
+        }
+
+        .foto {
+            min-width: 250px;
+            height: 250px;
+            background-color: #fff;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 6px solid #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Para mi niña hermosa ❤️</h1>
+    <p class="subtitulo">Pasa el mouse sobre cada sobre para abrirlo y haz clic para leer la carta.</p>
+
+    <div class="contador-contenedor">
+        <div class="contador-titulo">El tiempo que llevamos juntos ❤️</div>
+        <div id="reloj" class="contador-tiempo">Cargando nuestro tiempo...</div>
+    </div>
+
+    <div class="contenedor-sobres">
+        
+        <!-- Sobre 1 -->
+        <div class="sobre-wrapper" onclick="abrirCarta('carta1.jpeg')">
+            <div class="solapa"></div>
+            <div class="carta-previa">Sobre 1 🌸</div>
+            <div class="frente-sobre"></div>
+        </div>
+
+        <!-- Sobre 2 -->
+        <div class="sobre-wrapper" onclick="abrirCarta('carta2.jpeg')">
+            <div class="solapa"></div>
+            <div class="carta-previa">Sobre 2 ✨</div>
+            <div class="frente-sobre"></div>
+        </div>
+
+        <!-- Sobre 3 -->
+        <div class="sobre-wrapper" onclick="abrirCarta('carta3.jpeg')">
+            <div class="solapa"></div>
+            <div class="carta-previa">Sobre 3 🧸</div>
+            <div class="frente-sobre"></div>
+        </div>
+
+        <!-- Sobre 4 -->
+        <div class="sobre-wrapper" onclick="abrirCarta('carta4.jpeg')">
+            <div class="solapa"></div>
+            <div class="carta-previa">Sobre 4 🎈</div>
+            <div class="frente-sobre"></div>
+        </div>
+
+        <!-- Sobre 5 -->
+        <div class="sobre-wrapper" onclick="abrirCarta('carta5.jpeg')">
+            <div class="solapa"></div>
+            <div class="carta-previa">Sobre 5 💌</div>
+            <div class="frente-sobre"></div>
+        </div>
+
+    </div>
+    <h2 class="galeria-titulo">Nuestros Momentos 📸</h2>
+    <div class="contenedor-galeria">
+        <img class="foto" src="foto1.jpeg" alt="Momento 1">
+        <img class="foto" src="foto2.jpeg" alt="Momento 2">
+        <img class="foto" src="foto3.jpeg" alt="Momento 3">
+        <img class="foto" src="foto4.jpeg" alt="Momento 4">
+        <img class="foto" src="foto5.jpeg" alt="Momento 5">
+    </div>
+
+    <style>
+        .reproductor-contenedor {
+            background-color: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            padding: 25px;
+            width: 300px;
+            box-shadow: 0 10px 25px rgba(255, 77, 109, 0.15);
+            text-align: center;
+            margin: 40px auto 60px auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .reproductor-titulo-seccion {
+            color: #ff4d6d;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .reproductor-imagen {
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin: 0 auto 15px auto;
+            display: block;
+            animation: rotarVinilo 12s linear infinite;
+            animation-play-state: paused;
+        }
+
+        @keyframes rotarVinilo {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .cancion-nombre {
+            font-size: 16px;
+            font-weight: bold;
+            color: #4a4a4a;
+            margin: 5px 0 2px 0;
+            height: 22px; /* Evita que el contenedor salte al cambiar texto */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .cancion-artista {
+            font-size: 13px;
+            color: #ff758f;
+            margin-bottom: 20px;
+        }
+
+        .reproductor-botones {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-control {
+            background-color: #ff4d6d;
+            border: none;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(255, 77, 109, 0.25);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .btn-principal {
+            width: 55px;
+            height: 55px;
+            font-size: 22px;
+        }
+
+        .btn-secundario {
+            width: 40px;
+            height: 40px;
+            font-size: 14px;
+            background-color: #ff85a1;
+        }
+
+        .btn-control:hover {
+            transform: scale(1.08);
+            background-color: #ff4d6d;
+        }
+        
+        .btn-principal:hover {
+            background-color: #ff758f;
+        }
+
+        .btn-control:active {
+            transform: scale(0.95);
+        }
+    </style>
+
+    <div class="reproductor-contenedor">
+        <div class="reproductor-titulo-seccion">Nuestra música 🎵</div>
+        
+        <img id="reproductorFoto" class="reproductor-imagen" src="portada1.jpg" alt="Nuestra Foto">
+        
+        <div id="cancionTitulo" class="cancion-nombre">Cargando canción...</div>
+        <div id="cancionArtista" class="cancion-artista">Dedicado para ti ❤️</div>
+
+        <audio id="miAudio" src="cancion1.mp3"></audio>
+
+        <div class="reproductor-botones">
+            <button class="btn-control btn-secundario" onclick="cancionAnterior()">⏮</button>
+            <button id="btnPlayPause" class="btn-control btn-principal" onclick="alternarMusica()">▶</button>
+            <button class="btn-control btn-secundario" onclick="siguienteCancion()">⏭</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN DE TU LISTA DE REPRODUCCIÓN ---
+        // Aquí puedes cambiar los nombres de tus archivos, títulos y fotos fácilmente
+        const playlist = [
+            {
+                ruta: "cancion1.mp3",
+                titulo: "Siempre Te Voy A Querer - Calibre 50",
+                foto: "portada1.jpeg"
+            },
+            {
+                ruta: "cancion2.mp3",
+                titulo: "Beso - Jósean Log",
+                foto: "portada2.jpeg"
+            }
+        ];
+
+        let indiceActual = 0;
+        const audio = document.getElementById('miAudio');
+        const btnPlayPause = document.getElementById('btnPlayPause');
+        const fotoVinilo = document.getElementById('reproductorFoto');
+        const cancionTitulo = document.getElementById('cancionTitulo');
+
+        // Cargar los datos de la canción en el reproductor
+        function cargarCancion(indice) {
+            const cancion = playlist[indice];
+            audio.src = cancion.ruta;
+            cancionTitulo.innerText = cancion.titulo;
+            fotoVinilo.src = cancion.foto;
+        }
+
+        function alternarMusica() {
+            if (audio.paused) {
+                audio.play();
+                btnPlayPause.innerText = '⏸';
+                fotoVinilo.style.animationPlayState = 'running';
+            } else {
+                audio.pause();
+                btnPlayPause.innerText = '▶';
+                fotoVinilo.style.animationPlayState = 'paused';
+            }
+        }
+
+        function siguienteCancion() {
+            // Cambia a la siguiente (y si es la última, vuelve a la primera)
+            indiceActual = (indiceActual + 1) % playlist.length;
+            const estabaSonando = !audio.paused;
+            
+            cargarCancion(indiceActual);
+            
+            if (estabaSonando) {
+                audio.play();
+                fotoVinilo.style.animationPlayState = 'running';
+                btnPlayPause.innerText = '⏸';
+            } else {
+                btnPlayPause.innerText = '▶';
+                fotoVinilo.style.animationPlayState = 'paused';
+            }
+        }
+
+        function cancionAnterior() {
+            // Regresa a la anterior (y si es la primera, va a la última)
+            indiceActual = (indiceActual - 1 + playlist.length) % playlist.length;
+            const estabaSonando = !audio.paused;
+            
+            cargarCancion(indiceActual);
+            
+            if (estabaSonando) {
+                audio.play();
+                fotoVinilo.style.animationPlayState = 'running';
+                btnPlayPause.innerText = '⏸';
+            } else {
+                btnPlayPause.innerText = '▶';
+                fotoVinilo.style.animationPlayState = 'paused';
+            }
+        }
+
+        // Si termina la canción actual, salta automáticamente a la siguiente
+        audio.onended = function() {
+            siguienteCancion();
+            audio.play();
+            btnPlayPause.innerText = '⏸';
+            fotoVinilo.style.animationPlayState = 'running';
+        };
+
+        // Inicializar la primera canción al cargar la página
+        cargarCancion(indiceActual);
+    </script>
+    
+   <div id="miModal" class="modal">
+        <div class="contenido-modal" style="max-width: 500px; padding: 20px;">
+            <span class="cerrar-btn" onclick="cerrarCarta()" style="z-index: 10; background: rgba(255,255,255,0.8); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</span>
+            
+            <!-- Aquí es donde se cargará la foto dinámicamente -->
+            <img id="fotoCarta" src="" alt="Carta Sorpresa" style="width: 100%; max-height: 70vh; object-fit: contain; border-radius: 10px; display: block; margin: 0 auto;">
+        </div>
+    </div>
+
+    <script>
+        function abrirCarta(rutaImagen) {
+            // Cambiamos el 'src' de la imagen dentro de la ventana modal
+            document.getElementById('fotoCarta').src = rutaImagen;
+            document.getElementById('miModal').style.display = 'flex';
+        }
+
+        function cerrarCarta() {
+            document.getElementById('miModal').style.display = 'none';
+            // Limpiamos la ruta al cerrar para que no parpadee la foto anterior al abrir una nueva
+            document.getElementById('fotoCarta').src = '';
+        }
+
+        window.onclick = function(event) {
+            var modal = document.getElementById('miModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // --- CONFIGURA TU FECHA AQUÍ ---
+        // Año, Mes (Enero=0, Febrero=1, ..., Diciembre=11), Día
+        const fechaInicio = new Date(2025, 11, 16); 
+
+        function actualizarContador() {
+            const ahora = new Date();
+            const diferencia = ahora - fechaInicio;
+
+            if (diferencia < 0) {
+                document.getElementById('reloj').innerHTML = "¡Pronto comenzará nuestra historia! ❤️";
+                return;
+            }
+
+            const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+            const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+            const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
+
+            document.getElementById('reloj').innerHTML = 
+                `<span>${dias}</span> días, <span>${horas}</span> horas, <span>${minutos}</span> minutos y <span>${segundos}</span> segundos`;
+        }
+
+        actualizarContador();
+        setInterval(actualizarContador, 1000);
+
+        // --- FUNCIÓN DE CORAZONES OPTIMIZADA ---
+        function crearCorazon() {
+            const corazon = document.createElement('div');
+            corazon.classList.add('corazon-flotante');
+            
+            const iconos = ['❤️', '💖', '💝', '💕', '💗'];
+            corazon.innerText = iconos[Math.floor(Math.random() * iconos.length)];
+            
+            // Posición horizontal aleatoria
+            corazon.style.left = Math.random() * 100 + "vw";
+            
+            // Tamaño aleatorio variable
+            const tamano = Math.random() * 20 + 12 + "px";
+            corazon.style.fontSize = tamano;
+            
+            // Duración aleatoria para que no suban todos al mismo tiempo
+            const duracion = Math.random() * 4 + 4; // Entre 4 y 8 segundos
+            corazon.style.animationDuration = duracion + "s";
+            
+            document.body.appendChild(corazon);
+            
+            // Limpieza automática del elemento cuando termina su animación
+            setTimeout(() => {
+                corazon.remove();
+            }, duracion * 1000);
+        }
+
+        // Iniciar la tormenta de corazones
+        setInterval(crearCorazon, 250);
+    </script>
+
+</body>
+</html>
